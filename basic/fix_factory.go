@@ -164,8 +164,22 @@ func nos50(ord oms.Order) (quickfix.Messagable, error) {
 		field.NewOrdType(ord.OrdType),
 	)
 	nos.Set(field.NewHandlInst("1"))
-	nos.Set(field.NewSymbol(ord.Symbol))
 	nos.Set(field.NewOrderQty(ord.QuantityDecimal, 0))
+	nos.Set(field.NewSecurityType(ord.SecurityType))
+
+	if ord.Account != "" {
+		nos.Set(field.NewAccount(ord.Account))
+	}
+	if ord.Symbol != "" {
+		nos.Set(field.NewSymbol(ord.Symbol))
+	}
+	if ord.SecurityID != "" {
+		nos.Set(field.NewSecurityID(ord.SecurityID))
+		nos.Set(field.NewSecurityIDSource(ord.SecurityIDSource))
+	}
+	if ord.ExecInst != "" {
+		nos.Set(field.NewExecInst(enum.ExecInst(ord.ExecInst)))
+	}
 
 	return populateOrder(nos, ord)
 }

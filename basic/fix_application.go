@@ -1,6 +1,7 @@
 package basic
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/quickfixgo/enum"
@@ -35,8 +36,18 @@ func (a *FIXApplication) FromAdmin(msg *quickfix.Message, sessionID quickfix.Ses
 	return
 }
 
-//ToApp is ignored
+//ToApp squashes BusinessMessageReject
 func (a *FIXApplication) ToApp(msg *quickfix.Message, sessionID quickfix.SessionID) (err error) {
+	msgType, err := msg.MsgType()
+	if err != nil {
+		return err
+	}
+
+	switch enum.MsgType(msgType) {
+	case enum.MsgType_BUSINESS_MESSAGE_REJECT:
+		return quickfix.ErrDoNotSend
+	}
+
 	return
 }
 
@@ -50,9 +61,11 @@ func (a *FIXApplication) FromApp(msg *quickfix.Message, sessionID quickfix.Sessi
 	switch enum.MsgType(msgType) {
 	case enum.MsgType_EXECUTION_REPORT:
 		return a.onExecutionReport(msg, sessionID)
+	default:
+		fmt.Printf("error: unsupported MsgType: %s\n", msgType)
 	}
 
-	return quickfix.UnsupportedMessageType()
+	return nil
 }
 
 func (a *FIXApplication) onExecutionReport(msg *quickfix.Message, sessionID quickfix.SessionID) quickfix.MessageRejectError {

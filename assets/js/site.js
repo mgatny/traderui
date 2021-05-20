@@ -600,12 +600,32 @@ App.Views.OrderTicket = Backbone.View.extend({
         <option value='CS'>Common Stock</option>
         <option value='FUT'>Future</option>
         <option value='OPT'>Option</option>
+        <option value='IRS'>Interest Rate Swap</option>
       </select>
     </div>
 
+   <div class='form-group'>
+    <label for='symbol'>SecurityID</label>
+    <input type='text' class='form-control' name='security_id' placeholder='SecurityID' required>
+   </div>
+
+   <div class='form-group'>
+     <label for='symbol'>SecurityIDSource</label>
+     <select class='form-control' name='security_id_source' id='security_id_source'>
+       <option value=''></option>
+       <option value='8'>Exchange Symbol</option>
+       <option value='1'>CUSIP</option>
+       <option value='2'>SEDOL</option>
+       <option value='4'>ISIN</option>
+       <option value='5'>RIC</option>
+       <option value='6'>ISO Currency Code</option>
+       <option value='A'>Bloomberg Symbol</option>
+     </select>
+   </div>
+
     <div class='form-group'>
       <label for='symbol'>Symbol</label>
-      <input type='text' class='form-control' name='symbol' placeholder='Symbol' required>
+      <input type='text' class='form-control' name='symbol' placeholder='Symbol'>
     </div>
 
     <div class='form-group'>
@@ -675,6 +695,14 @@ App.Views.OrderTicket = Backbone.View.extend({
         <option value='5'>GTX</option>
       </select>
     </div>
+
+    <div class='form-group'>
+      <label for='tif'>ExecInst</label>
+      <select class='form-control' name='exec_inst'>
+        <option value=''></option>
+        <option value='G'>All or none (AON)</option>
+      </select>
+    </div>
   </p>
 
   <p>
@@ -714,10 +742,13 @@ App.Views.OrderTicket = Backbone.View.extend({
       session_id:           this.$('select[name=session]').val(),
       security_type:        this.$('select[name=security_type]').val(),
       security_desc:        this.$('select[name=security_desc]').val(),
+      security_id:          this.$('input[name=security_id]').val(),
+      security_id_source:   this.$('select[name=security_id_source]').val(),
       maturity_month_year:  this.$('input[name=maturity_month_year]').val(),
       maturity_day:         parseInt(this.$('input[name=maturity_day]').val()),
       put_or_call:          this.$('select[name=put_or_call]').val(),
       strike_price:         this.$('input[name=strike_price]').val(),
+      exec_inst:            this.$('select[name=exec_inst]').val(),
     });
 
     order.save();
