@@ -40,6 +40,12 @@ type Cross struct {
 	PutOrCall           enum.PutOrCall           `json:"put_or_call"`
 	StrikePrice         string                   `json:"strike_price"`
 	StrikePriceDecimal  decimal.Decimal          `json:"-"`
+	BuyClOrdID          string                   `json:"buy_clord_id"`
+	BuyAccount          string                   `json:"buy_account"`
+	BuyDesignation      string                   `json:"buy_designation"`
+	SellClOrdID         string                   `json:"sell_clord_id"`
+	SellAccount         string                   `json:"sell_account"`
+	SellDesignation     string                   `json:"sell_designation"`
 }
 
 //Init initialized computed fields on cross from user input

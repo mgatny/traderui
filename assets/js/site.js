@@ -610,7 +610,7 @@ App.Views.CrossTicket = Backbone.View.extend({
 <form class='form-inline' action='/cross' method='POST' id='cross-ticket'>
   <p>
     <div class='form-group'>
-      <label for='side'>CrossType</label>
+      <label for='cross_type'>CrossType</label>
       <select class='form-control' name='cross_type'>
         <option value=''></option>
         <option value='1'>All or none (AON)</option>
@@ -618,7 +618,7 @@ App.Views.CrossTicket = Backbone.View.extend({
     </div>
   
     <div class='form-group'>
-      <label for='side'>CrossPrioritization</label>
+      <label for='cross_prioritization'>CrossPrioritization</label>
       <select class='form-control' name='cross_prioritization'>
         <option value='0'>None</option>
         <option value='1'>Buy side is prioritized</option>
@@ -629,6 +629,37 @@ App.Views.CrossTicket = Backbone.View.extend({
     <div class='form-group'>
       <label for='quantity'>Quantity</label>
       <input type='number' class='form-control' name='quantity' placeholder='Quantity' required>
+    </div>
+  </p>
+
+  <p>
+    <div class='form-group'>
+      <label for='buy_clord_id'>Buy ClOrdID</label>
+      <input type='text' class='form-control' name='buy_clord_id' placeholder='Buy ClOrdID'>
+    </div>
+    <div class='form-group'>
+      <label for='sell_clord_id'>Sell ClOrdID</label>
+      <input type='text' class='form-control' name='sell_clord_id' placeholder='Sell ClOrdID'>
+    </div>
+  </p>
+  <p>
+    <div class='form-group'>
+      <label for='buy_account'>Buy Account</label>
+      <input type='text' class='form-control' name='buy_account' placeholder='Buy Account'>
+    </div>
+    <div class='form-group'>
+      <label for='sell_account'>Sell Account</label>
+      <input type='text' class='form-control' name='sell_account' placeholder='Sell Account'>
+    </div>
+  </p>
+  <p>
+    <div class='form-group'>
+      <label for='buy_designation'>Buy Designation</label>
+      <input type='text' class='form-control' name='buy_designation' placeholder='Buy Designation'>
+    </div>
+    <div class='form-group'>
+      <label for='sell_designation'>Sell Designation</label>
+      <input type='text' class='form-control' name='sell_designation' placeholder='Sell Designation'>
     </div>
   </p>
 
@@ -783,6 +814,12 @@ App.Views.CrossTicket = Backbone.View.extend({
       put_or_call:          this.$('select[name=put_or_call]').val(),
       strike_price:         this.$('input[name=strike_price]').val(),
       exec_inst:            this.$('select[name=exec_inst]').val(),
+      buy_clord_id:         this.$('input[name=buy_clord_id]').val(),
+      buy_account:          this.$('input[name=buy_account]').val(),
+      buy_designation:      this.$('input[name=buy_designation]').val(),
+      sell_clord_id:        this.$('input[name=sell_clord_id]').val(),
+      sell_account:         this.$('input[name=sell_account]').val(),
+      sell_designation:     this.$('input[name=sell_designation]').val(),
     });
 
     cross.save();
