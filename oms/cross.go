@@ -46,6 +46,7 @@ type Cross struct {
 	SellClOrdID         string                   `json:"sell_clord_id"`
 	SellAccount         string                   `json:"sell_account"`
 	SellDesignation     string                   `json:"sell_designation"`
+	SenderSubID         string                   `json:"sender_sub_id"`
 }
 
 //Init initialized computed fields on cross from user input

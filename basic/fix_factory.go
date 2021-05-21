@@ -197,6 +197,9 @@ func nos50(ord oms.Order) (quickfix.Messagable, error) {
 	nos.Set(field.NewOrderQty(ord.QuantityDecimal, 0))
 	nos.Set(field.NewSecurityType(ord.SecurityType))
 
+	if ord.SenderSubID != "" {
+		nos.Header.Set(field.NewSenderSubID(ord.SenderSubID))
+	}
 	if ord.Account != "" {
 		nos.Set(field.NewAccount(ord.Account))
 	}
@@ -225,6 +228,9 @@ func cross50(cross oms.Cross) (quickfix.Messagable, error) {
 	msg.Set(field.NewHandlInst("1"))
 	msg.Set(field.NewSecurityType(cross.SecurityType))
 
+	if cross.SenderSubID != "" {
+		msg.Header.Set(field.NewSenderSubID(cross.SenderSubID))
+	}
 	if cross.Symbol != "" {
 		msg.Set(field.NewSymbol(cross.Symbol))
 	}

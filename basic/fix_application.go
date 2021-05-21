@@ -46,8 +46,6 @@ func (a *FIXApplication) ToApp(msg *quickfix.Message, sessionID quickfix.Session
 	switch enum.MsgType(msgType) {
 	case enum.MsgType_BUSINESS_MESSAGE_REJECT:
 		return quickfix.ErrDoNotSend
-	case enum.MsgType_ORDER_SINGLE:
-		msg.Header.Set(field.NewSenderSubID("Trader1")) // FIXME
 	}
 
 	return

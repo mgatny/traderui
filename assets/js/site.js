@@ -777,6 +777,10 @@ App.Views.CrossTicket = Backbone.View.extend({
         <% _.each(session_ids, function(i){ %><option><%= i %></option><% }); %>
       </select>
     </div>
+    <div class='form-group'>
+      <label for='sender_sub_id'>SenderSubID</label>
+      <input type='text' class='form-control' id="sender_sub_id" placeholder='Sender Sub ID' name='sender_sub_id'>
+    </div>
   </p>
   <button type='submit' class='btn btn-default'>Submit</button>
 </form>
@@ -820,6 +824,7 @@ App.Views.CrossTicket = Backbone.View.extend({
       sell_clord_id:        this.$('input[name=sell_clord_id]').val(),
       sell_account:         this.$('input[name=sell_account]').val(),
       sell_designation:     this.$('input[name=sell_designation]').val(),
+      sender_sub_id:        this.$('input[name=sender_sub_id]').val(),
     });
 
     cross.save();
@@ -1022,6 +1027,10 @@ App.Views.OrderTicket = Backbone.View.extend({
         <% _.each(session_ids, function(i){ %><option><%= i %></option><% }); %>
       </select>
     </div>
+    <div class='form-group'>
+      <label for='sender_sub_id'>SenderSubID</label>
+      <input type='text' class='form-control' id="sender_sub_id" placeholder='Sender Sub ID' name='sender_sub_id'>
+    </div>
   </p>
   <button type='submit' class='btn btn-default'>Submit</button>
 </form>
@@ -1059,6 +1068,7 @@ App.Views.OrderTicket = Backbone.View.extend({
       put_or_call:          this.$('select[name=put_or_call]').val(),
       strike_price:         this.$('input[name=strike_price]').val(),
       exec_inst:            this.$('select[name=exec_inst]').val(),
+      sender_sub_id:        this.$('input[name=sender_sub_id]').val(),
     });
 
     order.save();
