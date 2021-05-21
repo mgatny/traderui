@@ -223,7 +223,6 @@ func cross50(cross oms.Cross) (quickfix.Messagable, error) {
 		field.NewOrdType(cross.OrdType),
 	)
 	msg.Set(field.NewHandlInst("1"))
-	msg.Set(field.NewOrderQty(cross.QuantityDecimal, 0))
 	msg.Set(field.NewSecurityType(cross.SecurityType))
 
 	if cross.Symbol != "" {
@@ -243,11 +242,13 @@ func cross50(cross oms.Cross) (quickfix.Messagable, error) {
 	buy.Set(field.NewClOrdID(cross.BuyClOrdID))
 	buy.Set(field.NewAccount(cross.BuyAccount))
 	buy.Set(field.NewDesignation(cross.BuyDesignation))
+	buy.Set(field.NewOrderQty(cross.QuantityDecimal, 0))
 	sell := noSides.Add()
 	sell.Set(field.NewSide(enum.Side_SELL))
 	sell.Set(field.NewClOrdID(cross.SellClOrdID))
 	sell.Set(field.NewAccount(cross.SellAccount))
 	sell.Set(field.NewDesignation(cross.SellDesignation))
+	sell.Set(field.NewOrderQty(cross.QuantityDecimal, 0))
 	msg.SetNoSides(noSides)
 
 	return populateCross(msg, cross)
