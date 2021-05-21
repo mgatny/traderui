@@ -2,92 +2,159 @@
 
 
 [[projects]]
+  digest = "1:20ed7daa9b3b38b6d1d39b48ab3fd31122be5419461470d0c28de3e121c93ecf"
   name = "github.com/gorilla/context"
   packages = ["."]
+  pruneopts = ""
   revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
   version = "v1.1"
 
 [[projects]]
+  digest = "1:74f252b12d195c61ef5e54a4e2ab677af765d9e4b68b42c8c64fd16a4502a0c8"
   name = "github.com/gorilla/mux"
   packages = ["."]
+  pruneopts = ""
   revision = "24fca303ac6da784b9e8269f724ddeb0b2eea5e7"
   version = "v1.5.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:48f6d17cffde02bd128e3a92c3294d8214fb857d14aa78b05345b790b238e4f7"
   name = "github.com/quickfixgo/enum"
   packages = ["."]
+  pruneopts = ""
   revision = "6f7d7044e7b9c208e831839bb6e785156733c656"
 
 [[projects]]
   branch = "master"
+  digest = "1:361dafd1a3dd1d93031e7ec315d441bdcee7f337fee403deea449681d37ebd9c"
   name = "github.com/quickfixgo/field"
   packages = ["."]
+  pruneopts = ""
   revision = "9a80eadddd16bb2799c5878b753d8f2ad1371694"
 
 [[projects]]
   branch = "master"
+  digest = "1:ad8921d145627e7c5ab738806d982450692d83888ea52a6d881bb08df9b6956f"
   name = "github.com/quickfixgo/fix40"
-  packages = [".","newordersingle"]
+  packages = [
+    ".",
+    "newordersingle",
+  ]
+  pruneopts = ""
   revision = "e067782c1aa4bb0ab0819b19348ef888ea26acb7"
 
 [[projects]]
   branch = "master"
+  digest = "1:21b6733dbec8286eb39afd3ecfd5a36910fa8f721db21a808a59797b653c4fe3"
   name = "github.com/quickfixgo/fix41"
-  packages = [".","newordersingle"]
+  packages = [
+    ".",
+    "newordersingle",
+  ]
+  pruneopts = ""
   revision = "7c62df84c7a215524a9f8292ea1d06923eeacb6c"
 
 [[projects]]
   branch = "master"
+  digest = "1:331197a19faf07da86c33ec9396fc9a2841c9f051f376348591b346a37014899"
   name = "github.com/quickfixgo/fix42"
-  packages = [".","newordersingle","ordercancelrequest"]
+  packages = [
+    ".",
+    "newordersingle",
+    "ordercancelrequest",
+  ]
+  pruneopts = ""
   revision = "0524454fdb3ffb4052b040aacbb9579021dec912"
 
 [[projects]]
   branch = "master"
+  digest = "1:4da629cb7e019e0cdd0c1d57e7538723fde649d256c32c8b14b6fddcf3a90d4d"
   name = "github.com/quickfixgo/fix43"
-  packages = [".","newordersingle"]
+  packages = [
+    ".",
+    "newordersingle",
+  ]
+  pruneopts = ""
   revision = "68f15729340433303ea787c3b18f51a3d7db6b2c"
 
 [[projects]]
   branch = "master"
+  digest = "1:cd90412f990e543821704351b29e2c6773870c8f0fabb56a022d1f8a4fad4f1d"
   name = "github.com/quickfixgo/fix44"
-  packages = [".","newordersingle"]
+  packages = [
+    ".",
+    "newordersingle",
+  ]
+  pruneopts = ""
   revision = "4018d8b3e12a1056ecc21442df29c8dd940ff567"
 
 [[projects]]
   branch = "master"
+  digest = "1:ec505a9fba6117ad5df3d490cf49edaf30793f3cfa077fc569fbb54c233e46df"
   name = "github.com/quickfixgo/fix50"
-  packages = ["newordersingle"]
+  packages = [
+    "newordercross",
+    "newordersingle",
+  ]
+  pruneopts = ""
   revision = "8edfb1517a2213fcaba5b15c447aa64edcb43ed2"
 
 [[projects]]
   branch = "master"
+  digest = "1:a90cb0485c3905ecae32af45199d0c9faeecddc6d082036e2a422b83e9cfd46e"
   name = "github.com/quickfixgo/fixt11"
   packages = ["."]
+  pruneopts = ""
   revision = "943f69cfc9d27b7b3423014673f5d7c90f63e79f"
 
 [[projects]]
   branch = "master"
+  digest = "1:5a61e3e5bc241c5b12073836e1fb5824779d9c5cdd6fc209779da4249c9398f4"
   name = "github.com/quickfixgo/quickfix"
-  packages = [".","config","datadictionary","internal"]
+  packages = [
+    ".",
+    "config",
+    "datadictionary",
+    "internal",
+  ]
+  pruneopts = ""
   revision = "d202ca98b53283d304d787bda0d782969c25d0cb"
 
 [[projects]]
   branch = "master"
+  digest = "1:ba24dc326dc840dba0e7c4cd7440b70d525d5f1679aeb55e4826c81fc37d8834"
   name = "github.com/quickfixgo/tag"
   packages = ["."]
+  pruneopts = ""
   revision = "97164cfff31adf3f70978a76daafcce13e8288af"
 
 [[projects]]
   branch = "master"
+  digest = "1:68a81aa25065b50a4bf1ffd115ff3634704f61f675d0140b31492e9fcca55421"
   name = "github.com/shopspring/decimal"
   packages = ["."]
+  pruneopts = ""
   revision = "aed1bfe463fa3c9cc268d60dcc1491db613bff7e"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a45609b17321cb775a542049255dd40b737c7355469236b465d16c05e003c18e"
+  input-imports = [
+    "github.com/gorilla/mux",
+    "github.com/quickfixgo/enum",
+    "github.com/quickfixgo/field",
+    "github.com/quickfixgo/fix40/newordersingle",
+    "github.com/quickfixgo/fix41/newordersingle",
+    "github.com/quickfixgo/fix42/newordersingle",
+    "github.com/quickfixgo/fix42/ordercancelrequest",
+    "github.com/quickfixgo/fix43/newordersingle",
+    "github.com/quickfixgo/fix44/newordersingle",
+    "github.com/quickfixgo/fix50/newordercross",
+    "github.com/quickfixgo/fix50/newordersingle",
+    "github.com/quickfixgo/quickfix",
+    "github.com/quickfixgo/tag",
+    "github.com/shopspring/decimal",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

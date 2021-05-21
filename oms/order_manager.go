@@ -15,27 +15,40 @@ type OrderManager struct {
 	executionID int
 	clOrdID     ClOrdIDGenerator
 
-	orders        map[int]*Order
-	clOrdIDLookup map[string]*Order
-	executions    map[int]*Execution
+	orders           map[int]*Order
+	crosses          map[int]*Cross
+	ordersByClOrdID  map[string]*Order
+	crossesByClOrdID map[string]*Cross
+	executions       map[int]*Execution
 }
 
 func NewOrderManager(idGen ClOrdIDGenerator) *OrderManager {
 	return &OrderManager{
-		clOrdIDLookup: make(map[string]*Order),
-		orders:        make(map[int]*Order),
-		executions:    make(map[int]*Execution),
-		clOrdID:       idGen,
+		ordersByClOrdID:  make(map[string]*Order),
+		orders:           make(map[int]*Order),
+		crossesByClOrdID: make(map[string]*Cross),
+		crosses:          make(map[int]*Cross),
+		executions:       make(map[int]*Execution),
+		clOrdID:          idGen,
 	}
 }
 
-func (om *OrderManager) GetAll() []*Order {
-	orders := make([]*Order, 0, len(om.clOrdIDLookup))
-	for _, v := range om.clOrdIDLookup {
+func (om *OrderManager) GetAllOrders() []*Order {
+	orders := make([]*Order, 0, len(om.ordersByClOrdID))
+	for _, v := range om.ordersByClOrdID {
 		orders = append(orders, v)
 	}
 
 	return orders
+}
+
+func (om *OrderManager) GetAllCrosses() []*Cross {
+	crosses := make([]*Cross, 0, len(om.crossesByClOrdID))
+	for _, v := range om.crossesByClOrdID {
+		crosses = append(crosses, v)
+	}
+
+	return crosses
 }
 
 func (om *OrderManager) GetAllExecutions() []*Execution {
@@ -47,7 +60,7 @@ func (om *OrderManager) GetAllExecutions() []*Execution {
 	return executions
 }
 
-func (om *OrderManager) Get(id int) (*Order, error) {
+func (om *OrderManager) GetOrder(id int) (*Order, error) {
 	var err error
 	order, ok := om.orders[id]
 	if !ok {
@@ -55,6 +68,16 @@ func (om *OrderManager) Get(id int) (*Order, error) {
 	}
 
 	return order, err
+}
+
+func (om *OrderManager) GetCross(id int) (*Cross, error) {
+	var err error
+	cross, ok := om.crosses[id]
+	if !ok {
+		err = fmt.Errorf("could not find cross with id %v", id)
+	}
+
+	return cross, err
 }
 
 func (om *OrderManager) GetExecution(id int) (*Execution, error) {
@@ -69,7 +92,7 @@ func (om *OrderManager) GetExecution(id int) (*Execution, error) {
 
 func (om *OrderManager) GetByClOrdID(clOrdID string) (*Order, error) {
 	var err error
-	order, ok := om.clOrdIDLookup[clOrdID]
+	order, ok := om.ordersByClOrdID[clOrdID]
 	if !ok {
 		err = fmt.Errorf("could not find order with clordid %v", clOrdID)
 	}
@@ -77,12 +100,22 @@ func (om *OrderManager) GetByClOrdID(clOrdID string) (*Order, error) {
 	return order, err
 }
 
-func (om *OrderManager) Save(order *Order) error {
+func (om *OrderManager) SaveOrder(order *Order) error {
 	order.ID = om.nextOrderID()
 	order.ClOrdID = om.clOrdID.Next()
 
 	om.orders[order.ID] = order
-	om.clOrdIDLookup[order.ClOrdID] = order
+	om.ordersByClOrdID[order.ClOrdID] = order
+
+	return nil
+}
+
+func (om *OrderManager) SaveCross(cross *Cross) error {
+	cross.ID = om.nextOrderID()
+	cross.ClOrdID = om.clOrdID.Next()
+
+	om.crosses[cross.ID] = cross
+	om.crossesByClOrdID[cross.ClOrdID] = cross
 
 	return nil
 }
@@ -94,9 +127,15 @@ func (om *OrderManager) SaveExecution(exec *Execution) error {
 	return nil
 }
 
-func (om *OrderManager) AssignNextClOrdID(order *Order) string {
+func (om *OrderManager) AssignNextOrderClOrdID(order *Order) string {
 	clOrdID := om.clOrdID.Next()
-	om.clOrdIDLookup[clOrdID] = order
+	om.ordersByClOrdID[clOrdID] = order
+	return clOrdID
+}
+
+func (om *OrderManager) AssignNextCrossClOrdID(cross *Cross) string {
+	clOrdID := om.clOrdID.Next()
+	om.crossesByClOrdID[clOrdID] = cross
 	return clOrdID
 }
 

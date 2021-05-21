@@ -20,6 +20,7 @@ import (
 
 type fixFactory interface {
 	NewOrderSingle(ord oms.Order) (msg quickfix.Messagable, err error)
+	NewOrderCross(cross oms.Cross) (msg quickfix.Messagable, err error)
 	OrderCancelRequest(ord oms.Order, clOrdID string) (msg quickfix.Messagable, err error)
 	SecurityDefinitionRequest(req secmaster.SecurityDefinitionRequest) (msg quickfix.Messagable, err error)
 }
@@ -55,7 +56,15 @@ func (c tradeClient) OrdersAsJSON() (string, error) {
 	c.RLock()
 	defer c.RUnlock()
 
-	b, err := json.Marshal(c.GetAll())
+	b, err := json.Marshal(c.GetAllOrders())
+	return string(b), err
+}
+
+func (c tradeClient) CrossesAsJSON() (string, error) {
+	c.RLock()
+	defer c.RUnlock()
+
+	b, err := json.Marshal(c.GetAllCrosses())
 	return string(b), err
 }
 
@@ -82,7 +91,17 @@ func (c tradeClient) fetchRequestedOrder(r *http.Request) (*oms.Order, error) {
 		panic(err)
 	}
 
-	return c.Get(id)
+	return c.GetOrder(id)
+}
+
+func (c tradeClient) fetchRequestedCross(r *http.Request) (*oms.Cross, error) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		panic(err)
+	}
+
+	return c.GetCross(id)
 }
 
 func (c tradeClient) fetchRequestedExecution(r *http.Request) (*oms.Execution, error) {
@@ -108,8 +127,33 @@ func (c tradeClient) getOrder(w http.ResponseWriter, r *http.Request) {
 	c.writeOrderJSON(w, order)
 }
 
+func (c tradeClient) getCross(w http.ResponseWriter, r *http.Request) {
+	c.RLock()
+	defer c.RUnlock()
+
+	cross, err := c.fetchRequestedCross(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	c.writeCrossJSON(w, cross)
+}
+
 func (c tradeClient) writeOrderJSON(w http.ResponseWriter, order *oms.Order) {
 	outgoingJSON, err := json.Marshal(order)
+	if err != nil {
+		log.Printf("[ERROR] err = %+v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprint(w, string(outgoingJSON))
+}
+
+func (c tradeClient) writeCrossJSON(w http.ResponseWriter, cross *oms.Cross) {
+	outgoingJSON, err := json.Marshal(cross)
 	if err != nil {
 		log.Printf("[ERROR] err = %+v\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -151,7 +195,7 @@ func (c tradeClient) deleteOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	clOrdID := c.AssignNextClOrdID(order)
+	clOrdID := c.AssignNextOrderClOrdID(order)
 	msg, err := c.OrderCancelRequest(*order, clOrdID)
 	if err != nil {
 		log.Printf("[ERROR] err = %+v\n", err)
@@ -169,6 +213,18 @@ func (c tradeClient) deleteOrder(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c tradeClient) getOrders(w http.ResponseWriter, r *http.Request) {
+	outgoingJSON, err := c.OrdersAsJSON()
+	if err != nil {
+		log.Printf("[ERROR] err = %+v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprint(w, outgoingJSON)
+}
+
+func (c tradeClient) getCrosses(w http.ResponseWriter, r *http.Request) {
 	outgoingJSON, err := c.OrdersAsJSON()
 	if err != nil {
 		log.Printf("[ERROR] err = %+v\n", err)
@@ -251,7 +307,7 @@ func (c tradeClient) newOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c.Lock()
-	c.OrderManager.Save(&order)
+	c.OrderManager.SaveOrder(&order)
 	c.Unlock()
 
 	msg, err := c.NewOrderSingle(order)
@@ -262,6 +318,50 @@ func (c tradeClient) newOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = quickfix.SendToTarget(msg, order.SessionID)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func (c tradeClient) newCross(w http.ResponseWriter, r *http.Request) {
+	var cross oms.Cross
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&cross)
+	if err != nil {
+		log.Printf("[ERROR] %v\n", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	log.Printf("newCross: %v\n", cross)
+	fmt.Printf("newCross: %v\n", cross)
+
+	if sessionID, ok := c.SessionIDs[cross.Session]; ok {
+		cross.SessionID = sessionID
+	} else {
+		log.Println("[ERROR] Invalid SessionID")
+		http.Error(w, "Invalid SessionID", http.StatusBadRequest)
+		return
+	}
+
+	if err = cross.Init(); err != nil {
+		log.Printf("[ERROR] %v\n", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	c.Lock()
+	c.OrderManager.SaveCross(&cross)
+	c.Unlock()
+
+	msg, err := c.NewOrderCross(cross)
+	if err != nil {
+		log.Printf("[ERROR] %v\n", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = quickfix.SendToTarget(msg, cross.SessionID)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -291,9 +391,7 @@ func main() {
 	logFactory := quickfix.NewScreenLogFactory()
 
 	var fixApp quickfix.Application
-	var app *tradeClient
-
-	app = newTradeClient(basic.FIXFactory{}, new(basic.ClOrdIDGenerator))
+	var app = newTradeClient(basic.FIXFactory{}, new(basic.ClOrdIDGenerator))
 	fixApp = &basic.FIXApplication{
 		SessionIDs:   app.SessionIDs,
 		OrderManager: app.OrderManager,
@@ -315,6 +413,10 @@ func main() {
 	router.HandleFunc("/orders", app.getOrders).Methods("GET")
 	router.HandleFunc("/orders/{id:[0-9]+}", app.getOrder).Methods("GET")
 	router.HandleFunc("/orders/{id:[0-9]+}", app.deleteOrder).Methods("DELETE")
+
+	router.HandleFunc("/crosses", app.newCross).Methods("POST")
+	router.HandleFunc("/crosses", app.getCrosses).Methods("GET")
+	router.HandleFunc("/crosses/{id:[0-9]+}", app.getCross).Methods("GET")
 
 	router.HandleFunc("/executions", app.getExecutions).Methods("GET")
 	router.HandleFunc("/executions/{id:[0-9]+}", app.getExecution).Methods("GET")

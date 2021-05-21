@@ -35,11 +35,16 @@ var App = new( Backbone.View.extend({
       session_ids: options.session_ids  
     });
 
+    this.crossTicket = new App.Models.CrossTicket({
+      session_ids: options.session_ids  
+    });
+
     this.securityDefinitionForm = new App.Models.SecurityDefinitionForm({
       session_ids: options.session_ids  
     });
 
     this.orders = new App.Collections.Orders(options.orders);
+    this.crosses = new App.Collections.Crosses(options.crosses);
     this.executions = new App.Collections.Executions(options.executions);
     this.router = new App.Router();
 
@@ -53,6 +58,19 @@ var App = new( Backbone.View.extend({
     $("#app").html(orderTicketView.render().el);
     $("#app").append(ordersView.render().el);
     $("#nav-order").addClass("active");
+    $("#nav-cross").removeClass("active");
+    $("#nav-execution").removeClass("active");
+    $("#nav-secdef").removeClass("active");
+  },
+
+  showCrosses: function() {
+    var crossTicketView = new App.Views.CrossTicket({model: this.crossTicket});
+    // FIXME var crossessView = new App.Views.CrossesView({collection: this.crosses});
+
+    $("#app").html(crossTicketView.render().el);
+    // FIXME $("#app").append(crossesView.render().el);
+    $("#nav-order").removeClass("active");
+    $("#nav-cross").addClass("active");
     $("#nav-execution").removeClass("active");
     $("#nav-secdef").removeClass("active");
   },
@@ -64,6 +82,7 @@ var App = new( Backbone.View.extend({
     $("#app").html(orderTicketView.render().el);
     $("#app").append(executionsView.render().el);
     $("#nav-order").removeClass("active");
+    $("#nav-cross").removeClass("active");
     $("#nav-execution").addClass("active");
     $("#nav-secdef").removeClass("active");
   },
@@ -72,6 +91,7 @@ var App = new( Backbone.View.extend({
     var secDefReq = new App.Views.SecurityDefinitionRequest({model: this.securityDefinitionForm});
     $("#app").html(secDefReq.render().el);
     $("#nav-order").removeClass("active");
+    $("#nav-cross").removeClass("active");
     $("#nav-execution").removeClass("active");
     $("#nav-secdef").addClass("active");
   },
@@ -106,6 +126,7 @@ App.Router = Backbone.Router.extend({
   routes: {
     "": "index", 
     "orders": "index",
+    "crosses": "crosses",
     "executions": "executions",
     "secdefs": "secdefs",
     "orders/:id": "orderDetails",
@@ -114,6 +135,10 @@ App.Router = Backbone.Router.extend({
 
   index: function(){
     App.showOrders();
+  },
+
+  crosses: function() {
+    App.showCrosses();
   },
 
   executions: function() {
@@ -137,6 +162,10 @@ App.Models.Order = Backbone.Model.extend({
   urlRoot: "/orders",
 });
 
+App.Models.Cross = Backbone.Model.extend({
+  urlRoot: "/crosses",
+});
+
 App.Models.Execution = Backbone.Model.extend({
   urlRoot: "/executions"
 });
@@ -146,10 +175,16 @@ App.Models.SecurityDefinitionRequest = Backbone.Model.extend({
 });
 
 App.Models.OrderTicket = Backbone.Model.extend({});
+App.Models.CrossTicket = Backbone.Model.extend({});
 App.Models.SecurityDefinitionForm = Backbone.Model.extend({});
 
 App.Collections.Orders = Backbone.Collection.extend({
   url: '/orders',
+  comparator: 'id'
+});
+
+App.Collections.Crosses = Backbone.Collection.extend({
+  url: '/crosses',
   comparator: 'id'
 });
 
@@ -567,6 +602,244 @@ App.Views.SecurityDefinitionRequest = Backbone.View.extend({
   render: function() {
     this.$el.html(this.template(this.model.attributes));
     return this;
+  }
+});
+
+App.Views.CrossTicket = Backbone.View.extend({
+  template: _.template(`
+<form class='form-inline' action='/cross' method='POST' id='cross-ticket'>
+  <p>
+    <div class='form-group'>
+      <label for='side'>CrossType</label>
+      <select class='form-control' name='cross_type'>
+        <option value=''></option>
+        <option value='1'>All or none (AON)</option>
+      </select>
+    </div>
+  
+    <div class='form-group'>
+      <label for='side'>CrossPrioritization</label>
+      <select class='form-control' name='cross_prioritization'>
+        <option value='0'>None</option>
+        <option value='1'>Buy side is prioritized</option>
+        <option value='2'>Sell side is prioritized</option>
+      </select>
+    </div>
+
+    <div class='form-group'>
+      <label for='quantity'>Quantity</label>
+      <input type='number' class='form-control' name='quantity' placeholder='Quantity' required>
+    </div>
+  </p>
+
+  <p>
+    <div class='form-group'>
+      <label for='security_type'>SecurityType</label>
+      <select class='form-control' name='security_type' id='security_type'>
+        <option value='CS'>Common Stock</option>
+        <option value='FUT'>Future</option>
+        <option value='OPT'>Option</option>
+        <option value='IRS'>Interest Rate Swap</option>
+      </select>
+    </div>
+
+   <div class='form-group'>
+    <label for='symbol'>SecurityID</label>
+    <input type='text' class='form-control' name='security_id' placeholder='SecurityID' required>
+   </div>
+
+   <div class='form-group'>
+     <label for='symbol'>SecurityIDSource</label>
+     <select class='form-control' name='security_id_source' id='security_id_source'>
+       <option value=''></option>
+       <option value='8'>Exchange Symbol</option>
+       <option value='1'>CUSIP</option>
+       <option value='2'>SEDOL</option>
+       <option value='4'>ISIN</option>
+       <option value='5'>RIC</option>
+       <option value='6'>ISO Currency Code</option>
+       <option value='A'>Bloomberg Symbol</option>
+     </select>
+   </div>
+
+    <div class='form-group'>
+      <label for='symbol'>Symbol</label>
+      <input type='text' class='form-control' name='symbol' placeholder='Symbol'>
+    </div>
+
+    <div class='form-group'>
+      <label for='security_desc'>Security Desc</label>
+      <input type='text' class='form-control' name='security_desc' placeholder='Security Desc'>
+    </div>
+  </p>
+  <p>
+    <div class='form-group'>
+      <label for='maturity_month_year'>Maturity Month Year</label>
+      <input type='text' class='form-control' name='maturity_month_year' id='maturity_month_year' placeholder='Maturity Month Year' disabled>
+    </div>
+
+    <div class='form-group'>
+      <label for='maturity_day'>Maturity Day</label>
+      <input type='number' class='form-control' name='maturity_day' id='maturity_day' placeholder='Maturity Day' disabled>
+    </div>
+
+    <div class='form-group'>
+      <label for='put_or_call'>Put or Call</label>
+      <select class='form-control' name='put_or_call' id='put_or_call' disabled>
+        <option value=1>Call</option>
+        <option value=0>Put</option>
+      </select>
+    </div>
+
+    <div class='form-group'>
+      <label for='strike_price'>Strike Price</label>
+      <input type='number' step='.01' class='form-control' name='strike_price' id='strike_price' placeholder='Strike Price' disabled>
+    </div>
+  </p>
+  <p>
+    <div class='form-group'>
+      <label for='ordType'>Type</label>
+      <select class='form-control' name='ordType' id="ordType">
+        <option value='1'>Market</option>
+        <option value='2'>Limit</option>
+        <option value='3'>Stop</option>
+        <option value='4'>Stop Limit</option>
+      </select>
+    </div>
+
+    <div class='form-group'>
+      <label for='limit'>Limit</label>
+      <input type='number' step='.01' class='form-control' id="limit" placeholder='Limit' name='price' disabled>
+    </div>
+
+    <div class='form-group'>
+      <label for='stop'>Stop</label>
+      <input type='number' step='.01' class='form-control' id="stop" placeholder='Stop' name='stopPrice' disabled>
+    </div>
+  </p>
+
+  <p>
+    <div class='form-group'>
+      <label for='tif'>TIF</label>
+      <select class='form-control' name='tif'>
+        <option value='0'>Day</option>
+        <option value='3'>IOC</option>
+        <option value='2'>OPG</option>
+        <option value='1'>GTC</option>
+        <option value='5'>GTX</option>
+      </select>
+    </div>
+
+    <div class='form-group'>
+      <label for='tif'>ExecInst</label>
+      <select class='form-control' name='exec_inst'>
+        <option value=''></option>
+        <option value='G'>All or none (AON)</option>
+      </select>
+    </div>
+  </p>
+
+  <p>
+    <div class='form-group'>
+      <label for='session'>Session</label>
+      <select class='form-control' name='session'>
+        <% _.each(session_ids, function(i){ %><option><%= i %></option><% }); %>
+      </select>
+    </div>
+  </p>
+  <button type='submit' class='btn btn-default'>Submit</button>
+</form>
+`),
+  render: function() {
+    this.$el.html(this.template(this.model.attributes));
+    return this;
+  },
+
+  events: {
+    "change #ordType": "updateOrdType",
+    "change #security_type": "updateSecurityType",
+    submit: "submit"
+  },
+
+  submit: function(e) {
+    e.preventDefault();
+    var cross = new App.Models.Cross();
+    cross.set({
+      cross_type:           this.$('select[name=cross_type]').val(),
+      cross_prioritization: this.$('select[name=cross_prioritization]').val(),
+      quantity:             this.$('input[name=quantity]').val(),
+      symbol:               this.$('input[name=symbol]').val(),
+      ord_type:             this.$('select[name=ordType]').val(),
+      price:                this.$('input[name=price]').val(),
+      stop_price:           this.$('input[name=stopPrice]').val(),
+      tif:                  this.$('select[name=tif]').val(),
+      session_id:           this.$('select[name=session]').val(),
+      security_type:        this.$('select[name=security_type]').val(),
+      security_desc:        this.$('select[name=security_desc]').val(),
+      security_id:          this.$('input[name=security_id]').val(),
+      security_id_source:   this.$('select[name=security_id_source]').val(),
+      maturity_month_year:  this.$('input[name=maturity_month_year]').val(),
+      maturity_day:         parseInt(this.$('input[name=maturity_day]').val()),
+      put_or_call:          this.$('select[name=put_or_call]').val(),
+      strike_price:         this.$('input[name=strike_price]').val(),
+      exec_inst:            this.$('select[name=exec_inst]').val(),
+    });
+
+    cross.save();
+  },
+
+  updateSecurityType: function() {
+    switch(this.$("#security_type option:selected").text()) {
+      case "Common Stock":
+        this.$("#maturity_month_year").attr({disabled: true, required: false});
+        this.$("#maturity_day").attr({disabled: true});
+        this.$("#put_or_call").attr({disabled: true, required: false});
+        this.$("#strike_price").attr({disabled: true, required: false});
+        break;
+      case "Future":
+        this.$("#maturity_month_year").attr({disabled: false, required: true});
+        this.$("#maturity_day").attr({disabled: false});
+        this.$("#put_or_call").attr({disabled: true, required: false});
+        this.$("#strike_price").attr({disabled: true, required: false});
+        break;
+      case "Option":
+        this.$("#maturity_month_year").attr({disabled: false, required: true});
+        this.$("#maturity_day").attr({disabled: false});
+        this.$("#put_or_call").attr({disabled: false, required: true});
+        this.$("#strike_price").attr({disabled: false, required: true});
+        break;
+    }
+  },
+
+  updateOrdType: function() {
+    switch(this.$("#ordType option:selected").text()) {
+      case "Limit":
+        this.$("#limit").prop("disabled", false);
+        this.$("#limit").prop("required", true);
+        this.$("#stop").prop("disabled", true);
+        this.$("#stop").prop("required", false);
+      break;
+
+      case "Stop":
+        this.$("#limit").prop("disabled", true);
+        this.$("#limit").prop("required", false);
+        this.$("#stop").prop("disabled", false);
+        this.$("#stop").prop("required", true);
+      break;
+
+      case "Stop Limit":
+        this.$("#limit").prop("disabled", false);
+        this.$("#limit").prop("required", true);
+        this.$("#stop").prop("disabled", false);
+        this.$("#stop").prop("required", true);
+      break;
+
+      default:
+        this.$("#limit").prop("disabled", true);
+        this.$("#stop").prop("disabled", true);
+        this.$("#limit").prop("required", false);
+        this.$("#stop").prop("required", false);
+    }
   }
 });
 
